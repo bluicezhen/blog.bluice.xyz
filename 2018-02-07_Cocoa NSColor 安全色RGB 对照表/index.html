@@ -1,0 +1,318 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author"><title>Cocoa NSColor 安全色 / RGB 对照表 · 甄三十七的博客</title><meta name="description" content="苹果在 Cocoa 里提供了若干安全色方便开发人员，统一界面风格，可惜这些颜色只给了值参考，在此整理一下。
+Xcode Version： 9.2 (9C40b)Swift Version：4
+
+
+
+名称
+RGB
+颜色
+
+
+
+
+NSColor.black
+#000000
+
+
+
+NSColor.brow"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.bootcss.com/KaTeX/0.8.3/katex.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><script src="https://www.googletagmanager.com/gtag/js?id=UA-111269307-1" async="acync"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-111269307-1');</script><script type="text/javascript" id="maid-script" src="https://cdn.bootcdn.net/ajax/libs/mermaid/9.1.3/mermaid.min.js"></script><script>if (window.mermaid) {
+    var options = JSON.parse(document.getElementById('maid-script').getAttribute('mermaidoptioins'));
+    mermaid.initialize({
+        startOnload: true
+    });
+}</script><meta name="generator" content="Hexo 6.3.0"></head><body><div class="sidebar animated fadeInDown"><div class="logo-title"><div class="title"><img src="/images/logo@2x.png" style="width:127px;"><h3 title=""><a href="/">甄三十七的博客</a></h3></div></div><ul class="social-links"></ul><div class="footer"><div class="by_farbox"><span>Theme by</span><a target="_blank" rel="noopener" href="https://www.caicai.me"> CaiCai&#65281;</a><span>&</span><a target="_blank" rel="noopener" href="https://github.com/Ben02/hexo-theme-Anatole"> Ben&#65281;</a></div><div class="by_farbox"><span>Published with</span><a href="https://hexo.io/zh-cn/" target="_blank"> Hexo&#65281;</a></div><div class="by_farbox"><span>Hosted by</span><a href="https://pages.github.com/" target="_blank"> github Pages&#65281</a></div></div></div><div class="main"><div class="page-top animated fadeInDown"><div class="nav"><li><a href="/">首页</a></li><li><a href="/categories/编程之道/">编程之道</a></li><li><a href="/categories/运维之道/">运维之道</a></li><li><a href="/categories/随笔杂谈/">随笔杂谈</a></li><li><a href="https://500px.me/zlb37" target="_blank">500px</a></li><li><a href="https://github.com/bluicezhen" target="_blank">GitHub</a></li></div><div class="information"><div class="back_btn"><li><a class="fa fa-chevron-left" onclick="window.history.go(-1)"> </a></li></div><div class="avatar"><img></div></div></div><div class="autopagerize_page_element"><div class="content"><div class="post-page"><div class="post animated fadeInDown"><div class="post-title"><h3><a>Cocoa NSColor 安全色 / RGB 对照表</a></h3></div><div class="post-content"><p>苹果在 Cocoa 里提供了若干安全色方便开发人员，统一界面风格，可惜这些颜色只给了值参考，在此整理一下。</p>
+<p><strong>Xcode Version</strong>： <code>9.2 (9C40b)</code><br><strong>Swift Version</strong>：<code>4</code></p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>RGB</th>
+<th>颜色</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NSColor.black</code></td>
+<td><code>#000000</code></td>
+<td><div style="background-color:#000000;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.brown</code></td>
+<td><code>#996633</code></td>
+<td><div style="background-color:#996633;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.cyan</code></td>
+<td><code>#00ffff</code></td>
+<td><div style="background-color:#00ffff;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.darkGray</code></td>
+<td><code>#555555</code></td>
+<td><div style="background-color:#555555;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.gray</code></td>
+<td><code>#808080</code></td>
+<td><div style="background-color:#808080;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.green</code></td>
+<td><code>#00ff00</code></td>
+<td><div style="background-color:#00ff00;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.labelColor</code></td>
+<td><code>#000000</code></td>
+<td><div style="background-color:#000000;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.lightGray</code></td>
+<td><code>#aaaaaa</code></td>
+<td><div style="background-color:#aaaaaa;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.magenta</code></td>
+<td><code>#ff00ff</code></td>
+<td><div style="background-color:#ff00ff;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.orange</code></td>
+<td><code>#ff7f00</code></td>
+<td><div style="background-color:#ff7f00;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.purple</code></td>
+<td><code>#7f007f</code></td>
+<td><div style="background-color:#7f007f;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.quaternaryLabelColor</code></td>
+<td><code>#000000</code></td>
+<td><div style="background-color:#000000;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.orange</code></td>
+<td><code>#ff7f00</code></td>
+<td><div style="background-color:#ff7f00;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.white</code></td>
+<td><code>#ffffff</code></td>
+<td><div style="background-color:#ffffff;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.yellow</code></td>
+<td><code>#ffff00</code></td>
+<td><div style="background-color:#ffff00;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.alternateSelectedControlColor</code></td>
+<td><code>#0069d9</code></td>
+<td><div style="background-color:#0069d9;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.alternateSelectedControlTextColor</code></td>
+<td><code>#ffffff</code></td>
+<td><div style="background-color:#ffffff;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.controlBackgroundColor</code></td>
+<td><code>#ffffff</code></td>
+<td><div style="background-color:#ffffff;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.controlColor</code></td>
+<td><code>#e7e7e7</code></td>
+<td><div style="background-color:#e7e7e7;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.controlHighlightColor</code></td>
+<td><code>#e2e2e2</code></td>
+<td><div style="background-color:#e2e2e2;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.controlLightHighlightColor</code></td>
+<td><code>#ffffff</code></td>
+<td><div style="background-color:#ffffff;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.controlShadowColor</code></td>
+<td><code>#8d8d8d</code></td>
+<td><div style="background-color:#8d8d8d;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.controlDarkShadowColor</code></td>
+<td><code>#000000</code></td>
+<td><div style="background-color:#000000;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.controlTextColor</code></td>
+<td><code>#000000</code></td>
+<td><div style="background-color:#000000;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.disabledControlTextColor</code></td>
+<td><code>#000000</code></td>
+<td><div style="background-color:#000000;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.gridColor</code></td>
+<td><code>#cccccc</code></td>
+<td><div style="background-color:#cccccc;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.headerColor</code></td>
+<td><code>#aaaaaa</code></td>
+<td><div style="background-color:#aaaaaa;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.headerTextColor</code></td>
+<td><code>#000000</code></td>
+<td><div style="background-color:#000000;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.highlightColor</code></td>
+<td><code>#ffffff</code></td>
+<td><div style="background-color:#ffffff;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.keyboardFocusIndicatorColor</code></td>
+<td><code>#3b99fc</code></td>
+<td><div style="background-color:#aaaaaa;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.knobColor</code></td>
+<td><code>#9999bb</code></td>
+<td><div style="background-color:#9999bb;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.scrollBarColor</code></td>
+<td><code>#aaaaaa</code></td>
+<td><div style="background-color:#aaaaaa;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.scrubberTexturedBackground</code></td>
+<td><code>#ffffff</code></td>
+<td><div style="background-color:#ffffff;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.secondarySelectedControlColor</code></td>
+<td><code>#dcdcdc</code></td>
+<td><div style="background-color:#dcdcdc;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.selectedControlColor</code></td>
+<td><code>#b2d7ff</code></td>
+<td><div style="background-color:#b2d7ff;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.selectedControlTextColor</code></td>
+<td><code>#000000</code></td>
+<td><div style="background-color:#000000;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.selectedTextColor</code></td>
+<td><code>#000000</code></td>
+<td><div style="background-color:#000000;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.selectedKnobColor</code></td>
+<td><code>#666699</code></td>
+<td><div style="background-color:#666699;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.shadowColor</code></td>
+<td><code>#000000</code></td>
+<td><div style="background-color:#b2d7ff;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.systemBlue</code></td>
+<td><code>#1badf8</code></td>
+<td><div style="background-color:#1badf8;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.systemBrown</code></td>
+<td><code>#a2845e</code></td>
+<td><div style="background-color:#a2845e;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.systemGray</code></td>
+<td><code>#8e8e91</code></td>
+<td><div style="background-color:#8e8e91;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.systemGreen</code></td>
+<td><code>#63da38</code></td>
+<td><div style="background-color:#63da38;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.systemOrange</code></td>
+<td><code>#ff9500</code></td>
+<td><div style="background-color:#ff9500;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.systemPink</code></td>
+<td><code>#ff2968</code></td>
+<td><div style="background-color:#ff2968;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.systemPurple</code></td>
+<td><code>#cc73e1</code></td>
+<td><div style="background-color:#cc73e1;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.systemRed</code></td>
+<td><code>#ff3b30</code></td>
+<td><div style="background-color:#ff3b30;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.systemYellow</code></td>
+<td><code>#ffcc00</code></td>
+<td><div style="background-color:#ffcc00;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.textBackgroundColor</code></td>
+<td><code>#ffffff</code></td>
+<td><div style="background-color:#ffffff;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.textColor</code></td>
+<td><code>#000000</code></td>
+<td><div style="background-color:#000000;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.windowBackgroundColor</code></td>
+<td><code>#ececec</code></td>
+<td><div style="background-color:#ececec;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.windowFrameColor</code></td>
+<td><code>#aaaaaa</code></td>
+<td><div style="background-color:#aaaaaa;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.windowFrameTextColor</code></td>
+<td><code>#000000</code></td>
+<td><div style="background-color:#ececec;width:20px;height:20px"></div></td>
+</tr>
+<tr>
+<td><code>NSColor.underPageBackgroundColor</code></td>
+<td><code>#ffffff</code></td>
+<td><div style="background-color:#ffffff;width:20px;height:20px"></div></td>
+</tr>
+</tbody>
+</table>
+</div><div class="post-footer"><div class="meta"><div class="info"><i class="fa fa-sun-o"></i><span class="date">2018-02-07</span><i class="fa fa-tag"></i><a class="tag" href="/categories/编程之道/" title="编程之道">编程之道 </a><a class="tag" href="/tags/苹果/" title="苹果">苹果 </a><a class="tag" href="/tags/IOS/" title="IOS">IOS </a><a class="tag" href="/tags/MacOS/" title="MacOS">MacOS </a><a class="tag" href="/tags/颜色/" title="颜色">颜色 </a><a class="tag" href="/tags/安全色/" title="安全色">安全色 </a><a class="tag" href="/tags/Cocoa/" title="Cocoa">Cocoa </a><a class="tag" href="/tags/AppKit/" title="AppKit">AppKit </a><a class="tag" href="/tags/UIKit/" title="UIKit">UIKit </a><a class="tag" href="/tags/XCode/" title="XCode">XCode </a></div></div></div></div><div class="share"><div class="evernote"><a class="fa fa-bookmark" href="javascript:(function(){EN_CLIP_HOST='http://www.evernote.com';try{var%20x=document.createElement('SCRIPT');x.type='text/javascript';x.src=EN_CLIP_HOST+'/public/bookmarkClipper.js?'+(new%20Date().getTime()/100000);document.getElementsByTagName('head')[0].appendChild(x);}catch(e){location.href=EN_CLIP_HOST+'/clip.action?url='+encodeURIComponent(location.href)+'&amp;title='+encodeURIComponent(document.title);}})();" ref="nofollow" target="_blank"></a></div><div class="weibo"><a class="fa fa-weibo" href="javascript:void((function(s,d,e){try{}catch(e){}var f='http://service.weibo.com/share/share.php?',u=d.location.href,p=['url=',e(u),'&amp;title=',e(d.title),'&amp;appkey=2924220432'].join('');function a(){if(!window.open([f,p].join(''),'mb',['toolbar=0,status=0,resizable=1,width=620,height=450,left=',(s.width-620)/2,',top=',(s.height-450)/2].join('')))u.href=[f,p].join('');};if(/Firefox/.test(navigator.userAgent)){setTimeout(a,0)}else{a()}})(screen,document,encodeURIComponent));"></a></div><div class="twitter"><a class="fa fa-twitter" target="_blank" rel="noopener" href="http://twitter.com/home?status=,https://blog.bluice.xyz/2018-02-07_Cocoa NSColor 安全色RGB 对照表/,甄三十七的博客,Cocoa NSColor 安全色 / RGB 对照表,;"></a></div></div><div class="pagination"><ul class="clearfix"><li class="pre pagbuttons"><a class="btn" role="navigation" href="/2018-03-07_REST%20-%20%E5%A6%82%E4%BD%95%E6%8A%BD%E8%B1%A1%E4%B8%BA%E8%B5%84%E6%BA%90%EF%BC%88Resource%EF%BC%89/" title="如何抽象为资源（Resource）">上一篇</a></li><li class="next pagbuttons"><a class="btn" role="navigation" href="/2018-01-31_LeetCode%20-%20Median%20of%20Two%20Sorted%20Arrays/" title="LeetCode - Median of Two Sorted Arrays">下一篇</a></li></ul></div></div></div></div></div><script src="/js/jquery.js"></script><script src="/js/jquery-migrate-1.2.1.min.js"></script><script src="/js/jquery.appear.js"></script><script src="https://cdn.bootcss.com/KaTeX/0.8.3/katex.min.js"></script><script src="https://cdn.bootcss.com/KaTeX/0.8.3/contrib/auto-render.min.js"></script><script>document.addEventListener("DOMContentLoaded", function () {
+  renderMathInElement(document.body, {
+    delimiters: [
+      {left: "$$", right: "$$", display: true},
+      {left: "\\[", right: "\\]", display: true},
+      {left: "$", right: "$", display: false},
+      {left: "\\(", right: "\\)", display: false}
+    ]
+  });
+});</script></body></html>
