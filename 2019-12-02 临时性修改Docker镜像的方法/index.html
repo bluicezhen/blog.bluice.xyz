@@ -1,4 +1,10 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author"><title>临时性修改Docker镜像的方法 · 甄三十七的博客</title><meta name="description" content="对于运维人员来说，在使用Docker进行容器化部署后，直接在生产环境修改代码开始变的麻烦。原因是在修改容器内的代码后，如果容器挂掉，不论是意外还是计划内，Docker一般会创建一个新的容器，新容器不会包含修改的内容。除此之外，一个镜像也会启动多个容器，同时修改多个容器也是一件工作量巨大的工作。
+<!DOCTYPE html><html lang="zh-CN"><head><!-- hexo injector head_begin start --><script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "kqrmkit37e");
+</script><!-- hexo injector head_begin end --><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><meta name="author"><title>临时性修改Docker镜像的方法 · 甄三十七的博客</title><meta name="description" content="对于运维人员来说，在使用Docker进行容器化部署后，直接在生产环境修改代码开始变的麻烦。原因是在修改容器内的代码后，如果容器挂掉，不论是意外还是计划内，Docker一般会创建一个新的容器，新容器不会包含修改的内容。除此之外，一个镜像也会启动多个容器，同时修改多个容器也是一件工作量巨大的工作。
 容器"><meta name="keywords"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="renderer" content="webkit"><link rel="short icon" href="/images/favicon.png" type="image/x-icon"><link rel="stylesheet" href="/css/style.css"><link rel="stylesheet" href="/css/blog_basic.css"><link rel="stylesheet" href="/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.bootcss.com/KaTeX/0.8.3/katex.min.css"><link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/atom.xml"><script src="https://www.googletagmanager.com/gtag/js?id=UA-111269307-1" async="acync"></script><script>window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
