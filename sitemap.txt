@@ -1,3 +1,4 @@
+https://blog.bluice.xyz/2025-01-12_aws-ec2-network-export/
 https://blog.bluice.xyz/2024-03-18_ffmpeg/
 https://blog.bluice.xyz/2018-01-31_LeetCode%20-%20Median%20of%20Two%20Sorted%20Arrays/
 https://blog.bluice.xyz/2010-08-16_%E5%86%AC/
@@ -167,6 +168,11 @@ https://blog.bluice.xyz/tags/h264/
 https://blog.bluice.xyz/tags/h265/
 https://blog.bluice.xyz/tags/avc/
 https://blog.bluice.xyz/tags/hevc/
+https://blog.bluice.xyz/tags/EC2/
+https://blog.bluice.xyz/tags/Prometheus/
+https://blog.bluice.xyz/tags/Monitoring/
+https://blog.bluice.xyz/tags/Network/
+https://blog.bluice.xyz/tags/CloudWatch/
 https://blog.bluice.xyz/categories/%E9%9A%8F%E7%AC%94/
 https://blog.bluice.xyz/categories/%E7%BC%96%E7%A8%8B/
 https://blog.bluice.xyz/categories/%E8%BF%90%E7%BB%B4/
