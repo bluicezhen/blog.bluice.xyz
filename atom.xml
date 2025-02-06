@@ -6,7 +6,7 @@
   <link href="https://blog.bluice.xyz/atom.xml" rel="self"/>
   
   <link href="https://blog.bluice.xyz/"/>
-  <updated>2025-01-13T06:40:01.546Z</updated>
+  <updated>2025-02-06T11:22:18.304Z</updated>
   <id>https://blog.bluice.xyz/</id>
   
   <author>
@@ -15,6 +15,35 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Restoring Metadata for Doris on K8S</title>
+    <link href="https://blog.bluice.xyz/2025-02-06_doris-k8s-metadata-recovery/"/>
+    <id>https://blog.bluice.xyz/2025-02-06_doris-k8s-metadata-recovery/</id>
+    <published>2025-02-06T14:00:00.000Z</published>
+    <updated>2025-02-06T11:22:18.304Z</updated>
+    
+    
+      
+      
+        
+        
+    <summary type="html">&lt;h2&gt;&lt;span id=&quot;1-background&quot;&gt;1. Background&lt;/span&gt;&lt;a href=&quot;#1-background&quot; class=&quot;header-anchor&quot;&gt;#&lt;/a&gt;&lt;/h2&gt;&lt;p&gt;I have a Doris cluster running</summary>
+        
+      
+    
+    
+    
+    <category term="运维" scheme="https://blog.bluice.xyz/categories/%E8%BF%90%E7%BB%B4/"/>
+    
+    
+    <category term="K8S" scheme="https://blog.bluice.xyz/tags/K8S/"/>
+    
+    <category term="Doris" scheme="https://blog.bluice.xyz/tags/Doris/"/>
+    
+    <category term="StatefulSet" scheme="https://blog.bluice.xyz/tags/StatefulSet/"/>
+    
+  </entry>
   
   <entry>
     <title>AWS EC2 Network Exporter</title>
@@ -680,37 +709,6 @@
     <category term="UIKit" scheme="https://blog.bluice.xyz/tags/UIKit/"/>
     
     <category term="XCode" scheme="https://blog.bluice.xyz/tags/XCode/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>LeetCode - Median of Two Sorted Arrays</title>
-    <link href="https://blog.bluice.xyz/2018-01-31_LeetCode%20-%20Median%20of%20Two%20Sorted%20Arrays/"/>
-    <id>https://blog.bluice.xyz/2018-01-31_LeetCode%20-%20Median%20of%20Two%20Sorted%20Arrays/</id>
-    <published>2018-01-31T02:25:11.000Z</published>
-    <updated>2025-01-10T06:32:12.649Z</updated>
-    
-    
-      
-      
-        
-        
-    <summary type="html">&lt;p&gt;&lt;strong&gt;问题描述：&lt;/strong&gt;There are two sorted arrays nums1 and nums2 of size m and n respectively. Find the median of the two sorted</summary>
-        
-      
-    
-    
-    
-    <category term="编程" scheme="https://blog.bluice.xyz/categories/%E7%BC%96%E7%A8%8B/"/>
-    
-    
-    <category term="算法" scheme="https://blog.bluice.xyz/tags/%E7%AE%97%E6%B3%95/"/>
-    
-    <category term="LeetCode" scheme="https://blog.bluice.xyz/tags/LeetCode/"/>
-    
-    <category term="排序" scheme="https://blog.bluice.xyz/tags/%E6%8E%92%E5%BA%8F/"/>
-    
-    <category term="C" scheme="https://blog.bluice.xyz/tags/C/"/>
     
   </entry>
   
