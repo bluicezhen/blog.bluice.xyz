@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>k8S ReplicaSet 缩容时的 Pod 删除逻辑详解 - 甄三十七</title>
+    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/css/style.css">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2099829783264981" crossorigin="anonymous"></script>
+    <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+<meta name="generator" content="Hexo 7.1.1"><link rel="alternate" href="/atom.xml" title="甄三十七" type="application/atom+xml">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="blog-title">
+                <a href="/">甄三十七</a>
+            </h1>
+            <nav class="nav">
+                
+                    <a href="/">首页</a>
+                
+                    <a target="_blank" rel="noopener" href="https://github.com/bluicezhen">Github</a>
+                
+                    <a target="_blank" rel="noopener" href="https://500px.com.cn/zlb37">500px</a>
+                
+            </nav>
+        </header>
+        
+        <main class="main">
+            <div class="content">
+                <article class="post">
+    <h1 class="post-title">k8S ReplicaSet 缩容时的 Pod 删除逻辑详解</h1>
+    <div class="post-meta">
+        <span class="post-time">2025-04-25</span>
+        
+            <span class="post-category">
+                <a class="post-category-link" href="/categories/%E8%BF%90%E7%BB%B4/">运维</a>
+            </span>
+        
+    </div>
+    <div class="post-content">
+        <div class="toc">
+
+<!-- toc -->
+<ul>
+<li><a href="#k8s-replicaset-suo-rong-shi-de-pod-shan-chu-luo-ji-xiang-jie">k8S ReplicaSet 缩容时的 Pod 删除逻辑详解</a><ul>
+<li><a href="#1-mo-ren-de-pod-shan-chu-shun-xu">1. 默认的 Pod 删除顺序</a></li>
+<li><a href="#2-ru-he-shan-chu-zhi-ding-pod">2. 如何删除指定 Pod</a></li>
+<li><a href="#3-shi-jian">3. 实践</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+</div>
+
+<h1><span id="k8s-replicaset-suo-rong-shi-de-pod-shan-chu-luo-ji-xiang-jie">k8S ReplicaSet 缩容时的 Pod 删除逻辑详解</span><a href="#k8s-replicaset-suo-rong-shi-de-pod-shan-chu-luo-ji-xiang-jie" class="header-anchor">#</a></h1><h2><span id="1-mo-ren-de-pod-shan-chu-shun-xu">1. 默认的 Pod 删除顺序</span><a href="#1-mo-ren-de-pod-shan-chu-shun-xu" class="header-anchor">#</a></h2><p>当 ReplicaSet 检测到当前的 Pod 数量（<code>filteredPods</code>）超过期望的数量（<code>rs.Spec.Replicas</code>）时，它会调用 <code>manageReplicas</code> 函数来处理缩容逻辑。核心的删除决策发生在 <code>getPodsToDelete</code> 函数中，该函数通过对候选 Pod 进行排序来选出需要删除的 Pod（位于 <a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/blob/v1.30.12/pkg/controller/replicaset/replica_set.go"><code>pkg/controller/replicaset/replica_set.go</code></a> 和 <a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/blob/v1.30.12/pkg/controller/controller_utils.go"><code>pkg/controller/controller_utils.go</code></a>）。</p>
+<p>排序过程依赖 <code>getPodsRankedByRelatedPodsOnSameNode</code> 函数计算排名 &amp; <code>controller.ActivePodsWithRanks</code> 的 <code>Less</code> 方法（定义在 <a target="_blank" rel="noopener" href="https://github.com/kubernetes/kubernetes/blob/v1.30.12/pkg/controller/controller_utils.go"><code>pkg/controller/controller_utils.go</code></a>）。排序遵循以下优先级，<strong>数字越小优先级越高（越先被删除）</strong>:</p>
+<ol>
+<li><strong>Pod 分配状态</strong>: 未分配到节点（<code>pod.Spec.NodeName</code> 为空）的 Pod 优先于已分配的 Pod。</li>
+<li><strong>Pod Phase</strong>:<code>Pending</code> 状态的 Pod 优先于其他状态。</li>
+<li><strong>Pod 就绪状态 (Readiness)</strong>: <code>Running</code> 但 <code>Not Ready</code> 的 Pod 优先于 <code>Running</code> &amp; <code>Ready</code> 的 Pod。</li>
+<li><strong>Pod 删除成本 (Deletion Cost)</strong>:<ul>
+<li>控制器会检查 Pod 是否包含 <code>controller.kubernetes.io/pod-deletion-cost</code> 注解。</li>
+<li>该注解的值需要能被解析为 <code>int32</code>。<strong>值越小优先级越高</strong>。</li>
+<li>没有该注解或注解值无效的 Pod，其删除成本被视为 0。</li>
+</ul>
+</li>
+<li><strong>同节点 Pod 数量</strong>: 运行在拥有更多关联 Pod（如：属于同一 Controller 管理的其他 ReplicaSet）的节点上的 Pod 会被优先删除。通过 <code>getPodsRankedByRelatedPodsOnSameNode</code> 计算得到的排名（Rank），<strong>Rank 值越高的 Pod 越优先被删除</strong>。</li>
+<li><strong>Pod 创建时间</strong>: 创建时间较早 (Older) 的 Pod 会被优先删除</li>
+</ol>
+<h2><span id="2-ru-he-shan-chu-zhi-ding-pod">2. 如何删除指定 Pod</span><a href="#2-ru-he-shan-chu-zhi-ding-pod" class="header-anchor">#</a></h2><ul>
+<li><strong>删除成本足够低</strong>: 要确保某个 Pod 被优先删除，需要将其删除成本设置得显著低于其他候选 Pod。如，将其设置为负数，而其他 Pod 没有设置或设置为正数。</li>
+<li><strong>其他高优先级条件相同</strong>: 需要注意的是，删除成本只是排序规则中的一项。如果存在更高优先级的差异（例如，一个 Pod 处于 <code>Pending</code> 状态，而另一个设置了低成本的 Pod 处于 <code>Running</code> 且 <code>Ready</code> 状态），那么 <code>Pending</code> 状态的 Pod 仍然会被优先删除。</li>
+</ul>
+<h2><span id="3-shi-jian">3. 实践</span><a href="#3-shi-jian" class="header-anchor">#</a></h2><ul>
+<li><p>初始状态，3 个 pod，确保 Running &amp; Ready</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl get pod </span><br><span class="line">NAME                   READY   STATUS    RESTARTS   AGE</span><br><span class="line">pod-7cdb499b56-48xtp   1/1     Running   0          14m</span><br><span class="line">pod-7cdb499b56-lbsz5   1/1     Running   0          15d</span><br><span class="line">pod-7cdb499b56-xxmnp   1/1     Running   0          14m</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>设置 pod emqx-blue-replicant-7cdb499b56-48xtp 的删除成本为 -100，其他 pod 的删除成本为 100</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">kubectl --context test_eu_eks -n infra-iot-broker-core annotate pod pod-7cdb499b56-48xtp controller.kubernetes.io/pod-deletion-cost=-100</span><br><span class="line">kubectl --context test_eu_eks -n infra-iot-broker-core annotate pod pod-7cdb499b56-lbsz5 controller.kubernetes.io/pod-deletion-cost=100</span><br><span class="line">kubectl --context test_eu_eks -n infra-iot-broker-core annotate pod pod-7cdb499b56-xxmnp controller.kubernetes.io/pod-deletion-cost=100</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>缩容到 2 个 pod</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl scale deployment pod --replicas=2</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看结果</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl get pod </span><br><span class="line">NAME                   READY   STATUS    RESTARTS   AGE</span><br><span class="line">pod-7cdb499b56-lbsz5   1/1     Running   0          15d</span><br><span class="line">pod-7cdb499b56-xxmnp   1/1     Running   0          40m</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+    </div>
+    
+        <div class="post-tags">
+            <ul class="post-tag-list" itemprop="keywords"><li class="post-tag-list-item"><a class="post-tag-list-link" href="/tags/K8S/" rel="tag">K8S</a></li><li class="post-tag-list-item"><a class="post-tag-list-link" href="/tags/Pod/" rel="tag">Pod</a></li><li class="post-tag-list-item"><a class="post-tag-list-link" href="/tags/ReplicaSet/" rel="tag">ReplicaSet</a></li><li class="post-tag-list-item"><a class="post-tag-list-link" href="/tags/Scaling/" rel="tag">Scaling</a></li></ul>
+        </div>
+    
+</article> 
+            </div>
+            <aside class="sidebar">
+                <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-content">
+        <ul class="category-list-list"><li class="category-list-list-item"><a class="category-list-list-link" href="/categories/%E7%BC%96%E7%A8%8B/">编程</a></li><li class="category-list-list-item"><a class="category-list-list-link" href="/categories/%E9%9A%8F%E7%AC%94/">随笔</a></li><li class="category-list-list-item"><a class="category-list-list-link" href="/categories/%E8%BF%90%E7%BB%B4/">运维</a></li></ul>
+    </div>
+</div>
+<div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-content">
+        <ul class="tag-list-list" itemprop="keywords"><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/Python/" rel="tag">Python</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/Django/" rel="tag">Django</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/K8S/" rel="tag">K8S</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/AWS/" rel="tag">AWS</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E7%AB%A5%E5%B9%B4/" rel="tag">童年</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E7%8E%AF%E5%A2%83/" rel="tag">环境</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B/" rel="tag">软件工程</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E5%88%9B%E4%B8%9A%E5%85%AC%E5%8F%B8/" rel="tag">创业公司</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/Vue/" rel="tag">Vue</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/Discuz/" rel="tag">Discuz</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/KML/" rel="tag">KML</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/EKS/" rel="tag">EKS</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E5%86%AC%E5%A4%A9/" rel="tag">冬天</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E8%8D%89%E5%8E%9F/" rel="tag">草原</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E9%AB%98%E5%9B%9B/" rel="tag">高四</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E9%AB%98%E8%80%83/" rel="tag">高考</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E8%A1%A5%E4%B9%A0/" rel="tag">补习</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E6%9C%8B%E5%8F%8B/" rel="tag">朋友</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E5%AE%B6/" rel="tag">家</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E9%99%A2%E5%AD%90/" rel="tag">院子</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E5%BE%80%E6%97%A5%E6%97%B6%E5%85%89/" rel="tag">往日时光</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E7%83%AD%E6%B0%B4%E5%A1%98/" rel="tag">热水塘</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E5%8D%A1%E5%95%A6OK/" rel="tag">卡啦OK</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E5%94%B1%E6%AD%8C/" rel="tag">唱歌</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E5%A4%8F%E5%A4%A9/" rel="tag">夏天</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E7%8B%BC%E7%9A%84%E5%A4%8F%E5%A4%A9/" rel="tag">狼的夏天</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E7%94%B5%E5%BD%B1/" rel="tag">电影</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E7%8B%BC/" rel="tag">狼</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E9%87%8E%E7%94%9F%E5%8A%A8%E7%89%A9/" rel="tag">野生动物</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/" rel="tag">文件管理</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E6%96%87%E4%BB%B6/" rel="tag">文件</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E8%8C%B6/" rel="tag">茶</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E7%A6%85/" rel="tag">禅</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E4%BD%9B/" rel="tag">佛</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E4%BB%AA%E5%BC%8F%E6%84%9F/" rel="tag">仪式感</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E6%90%9C%E7%B4%A2%E5%BC%95%E6%93%8E/" rel="tag">搜索引擎</a></li></ul>
+    </div>
+</div>
+<amp-ad width="100vw" height="320"
+     type="adsense"
+     data-ad-client="ca-pub-2099829783264981"
+     data-ad-slot="2726713640"
+     data-auto-format="rspv"
+     data-full-width="">
+  <div overflow=""></div>
+</amp-ad>
+            </aside>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 甄三十七, bluice.zhen@gmail.com</p>
+        </footer>
+    </div>
+</body>
+</html> 
