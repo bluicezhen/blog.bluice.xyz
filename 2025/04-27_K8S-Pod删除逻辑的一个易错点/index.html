@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>K8S Pod 删除逻辑的一个易错点 - 甄三十七</title>
+    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="/css/style.css">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2099829783264981" crossorigin="anonymous"></script>
+    <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+<meta name="generator" content="Hexo 7.1.1"><link rel="alternate" href="/atom.xml" title="甄三十七" type="application/atom+xml">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="blog-title">
+                <a href="/">甄三十七</a>
+            </h1>
+            <nav class="nav">
+                
+                    <a href="/">首页</a>
+                
+                    <a target="_blank" rel="noopener" href="https://github.com/bluicezhen">Github</a>
+                
+                    <a target="_blank" rel="noopener" href="https://500px.com.cn/zlb37">500px</a>
+                
+            </nav>
+        </header>
+        
+        <main class="main">
+            <div class="content">
+                <article class="post">
+    <h1 class="post-title">K8S Pod 删除逻辑的一个易错点</h1>
+    <div class="post-meta">
+        <span class="post-time">2025-04-27</span>
+        
+            <span class="post-category">
+                <a class="post-category-link" href="/categories/%E8%BF%90%E7%BB%B4/">运维</a>
+            </span>
+        
+    </div>
+    <div class="post-content">
+        <div class="toc">
+
+<!-- toc -->
+<ul>
+<li><a href="#k8s-pod-shan-chu-luo-ji-de-yi-ge-yi-cuo-dian">K8S Pod 删除逻辑的一个易错点</a><ul>
+<li><a href="#1-wen-ti-miao-shu">1. 问题描述</a></li>
+<li><a href="#2-yuan-yin-fen-xi">2. 原因分析</a></li>
+<li><a href="#3-jie-jue-fang-an">3. 解决方案</a></li>
+<li><a href="#4-kubernetes-pod-sheng-ming-zhou-qi-xu-zhu-yi">4. Kubernetes Pod 生命周期需注意</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+</div>
+
+<h1><span id="k8s-pod-shan-chu-luo-ji-de-yi-ge-yi-cuo-dian">K8S Pod 删除逻辑的一个易错点</span><a href="#k8s-pod-shan-chu-luo-ji-de-yi-ge-yi-cuo-dian" class="header-anchor">#</a></h1><h2><span id="1-wen-ti-miao-shu">1. 问题描述</span><a href="#1-wen-ti-miao-shu" class="header-anchor">#</a></h2><p>在 Kubernetes 控制器开发中，我们遇到了一个问题：当 Pod 进入 terminating 状态时，未被检查到，导致 Running 状态的列表中仍然存在该 Pod。</p>
+<h2><span id="2-yuan-yin-fen-xi">2. 原因分析</span><a href="#2-yuan-yin-fen-xi" class="header-anchor">#</a></h2><p>这个问题的根本原因在于 <strong>Kubernetes Pod 生命周期的特殊性</strong>，以及我们对 Pod 状态判断的不完整：</p>
+<ol>
+<li><p><strong>Pod 终止是一个过程，而非瞬时状态</strong>：</p>
+<ul>
+<li>当一个 Pod 被标记为删除时，Kubernetes 首先会设置 <code>Pod.DeletionTimestamp</code> 字段</li>
+<li>此时 Pod 的 <code>Status.Phase</code> 字段仍然保持为 <code>Running</code>，直到容器实际停止</li>
+<li>这个过程可能持续数秒到数分钟</li>
+</ul>
+</li>
+<li><p><strong>代码中的逻辑缺陷</strong>：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 原代码只检查了 Phase 是否为 Running</span></span><br><span class="line"><span class="keyword">if</span> !isPodRelatedToKinesisConsumer(&amp;p, kcCopy) || p.Status.Phase != corev1.PodRunning &#123;</span><br><span class="line">    <span class="keyword">continue</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这段代码的问题在于：它只检查了 Pod 的 Phase 是否为 Running，但没有检查 Pod 是否已经被标记为删除（即是否设置了 DeletionTimestamp）。在以前的开发过程中，遇到都是 Pod 很快被删除的场景，故为发现该问题。</p>
+</li>
+</ol>
+<h2><span id="3-jie-jue-fang-an">3. 解决方案</span><a href="#3-jie-jue-fang-an" class="header-anchor">#</a></h2><p>修改 Pod 筛选逻辑，同时检查 <code>DeletionTimestamp</code>：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 修改后的代码</span></span><br><span class="line"><span class="keyword">if</span> !isPodRelatedToKinesisConsumer(&amp;p, kcCopy) || </span><br><span class="line">   p.Status.Phase != corev1.PodRunning ||</span><br><span class="line">   p.DeletionTimestamp != <span class="literal">nil</span> &#123;  <span class="comment">// 额外检查 DeletionTimestamp</span></span><br><span class="line">    <span class="keyword">continue</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样，即使 Pod 的 Phase 仍为 Running，但只要它被标记为删除（设置了 DeletionTimestamp），就会被排除在分片分配之外。</p>
+<h2><span id="4-kubernetes-pod-sheng-ming-zhou-qi-xu-zhu-yi">4. Kubernetes Pod 生命周期需注意</span><a href="#4-kubernetes-pod-sheng-ming-zhou-qi-xu-zhu-yi" class="header-anchor">#</a></h2><ol>
+<li><p><strong>终止状态判断</strong>：</p>
+<ul>
+<li>不要仅依赖 <code>Pod.Status.Phase</code> 判断 Pod 是否在终止</li>
+<li>始终检查 <code>Pod.DeletionTimestamp != nil</code> 来确定 Pod 是否开始了删除流程</li>
+</ul>
+</li>
+<li><p><strong>删除顺序与事件时机</strong>：</p>
+<ul>
+<li>Pod 删除是一个多阶段过程：设置 DeletionTimestamp → 执行 preStop hook → 发送 SIGTERM → 等待优雅终止时间 → 发送 SIGKILL</li>
+<li>控制器可能在这个过程的任何阶段被触发，需要稳健处理各种状态</li>
+</ul>
+</li>
+<li><p><strong>资源清理时机</strong>：</p>
+<ul>
+<li>对于依赖 Pod 的资源（如我们的分片分配），应当在 Pod 进入终止状态就立即更新相关状态</li>
+<li>不要等到 Pod 完全删除后再处理，这会导致不必要的延迟</li>
+</ul>
+</li>
+</ol>
+
+    </div>
+    
+        <div class="post-tags">
+            <ul class="post-tag-list" itemprop="keywords"><li class="post-tag-list-item"><a class="post-tag-list-link" href="/tags/Controller/" rel="tag">Controller</a></li><li class="post-tag-list-item"><a class="post-tag-list-link" href="/tags/Golang/" rel="tag">Golang</a></li><li class="post-tag-list-item"><a class="post-tag-list-link" href="/tags/K8S/" rel="tag">K8S</a></li><li class="post-tag-list-item"><a class="post-tag-list-link" href="/tags/Pod/" rel="tag">Pod</a></li></ul>
+        </div>
+    
+</article> 
+            </div>
+            <aside class="sidebar">
+                <div class="widget">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget-content">
+        <ul class="category-list-list"><li class="category-list-list-item"><a class="category-list-list-link" href="/categories/%E7%BC%96%E7%A8%8B/">编程</a></li><li class="category-list-list-item"><a class="category-list-list-link" href="/categories/%E8%BF%90%E7%BB%B4/">运维</a></li><li class="category-list-list-item"><a class="category-list-list-link" href="/categories/%E9%9A%8F%E7%AC%94/">随笔</a></li><li class="category-list-list-item"><a class="category-list-list-link" href="/categories/%E5%BC%80%E5%8F%91/">开发</a></li></ul>
+    </div>
+</div>
+<div class="widget">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget-content">
+        <ul class="tag-list-list" itemprop="keywords"><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/Python/" rel="tag">Python</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/Django/" rel="tag">Django</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/K8S/" rel="tag">K8S</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/AWS/" rel="tag">AWS</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E7%AB%A5%E5%B9%B4/" rel="tag">童年</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E7%8E%AF%E5%A2%83/" rel="tag">环境</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B/" rel="tag">软件工程</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E5%88%9B%E4%B8%9A%E5%85%AC%E5%8F%B8/" rel="tag">创业公司</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/Vue/" rel="tag">Vue</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/Docker/" rel="tag">Docker</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/Discuz/" rel="tag">Discuz</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/KML/" rel="tag">KML</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/EKS/" rel="tag">EKS</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/Pod/" rel="tag">Pod</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E5%86%AC%E5%A4%A9/" rel="tag">冬天</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E8%8D%89%E5%8E%9F/" rel="tag">草原</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E9%AB%98%E5%9B%9B/" rel="tag">高四</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E9%AB%98%E8%80%83/" rel="tag">高考</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E8%A1%A5%E4%B9%A0/" rel="tag">补习</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E6%9C%8B%E5%8F%8B/" rel="tag">朋友</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E5%AE%B6/" rel="tag">家</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E9%99%A2%E5%AD%90/" rel="tag">院子</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E5%BE%80%E6%97%A5%E6%97%B6%E5%85%89/" rel="tag">往日时光</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E7%83%AD%E6%B0%B4%E5%A1%98/" rel="tag">热水塘</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E5%8D%A1%E5%95%A6OK/" rel="tag">卡啦OK</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E5%94%B1%E6%AD%8C/" rel="tag">唱歌</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E5%A4%8F%E5%A4%A9/" rel="tag">夏天</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E7%8B%BC%E7%9A%84%E5%A4%8F%E5%A4%A9/" rel="tag">狼的夏天</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E7%94%B5%E5%BD%B1/" rel="tag">电影</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E7%8B%BC/" rel="tag">狼</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E9%87%8E%E7%94%9F%E5%8A%A8%E7%89%A9/" rel="tag">野生动物</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E6%96%87%E4%BB%B6%E7%AE%A1%E7%90%86/" rel="tag">文件管理</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E6%96%87%E4%BB%B6/" rel="tag">文件</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E8%8C%B6/" rel="tag">茶</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E7%A6%85/" rel="tag">禅</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E4%BD%9B/" rel="tag">佛</a></li><li class="tag-list-list-item"><a class="tag-list-list-link" href="/tags/%E4%BB%AA%E5%BC%8F%E6%84%9F/" rel="tag">仪式感</a></li></ul>
+    </div>
+</div>
+<amp-ad width="100vw" height="320"
+     type="adsense"
+     data-ad-client="ca-pub-2099829783264981"
+     data-ad-slot="2726713640"
+     data-auto-format="rspv"
+     data-full-width="">
+  <div overflow=""></div>
+</amp-ad>
+            </aside>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 甄三十七, bluice.zhen@gmail.com</p>
+        </footer>
+    </div>
+</body>
+</html> 
